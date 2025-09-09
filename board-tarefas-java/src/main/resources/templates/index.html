@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Board de Tarefas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" th:href="@{/css/style.css}" href="/css/style.css"/>
+</head>
+<body>
+<header class="container">
+    <h1>Board de Tarefas</h1>
+</header>
+
+<main class="container">
+    <section class="new-task">
+        <h2>Nova Tarefa</h2>
+        <form th:action="@{/tasks}" method="post" th:object="${task}">
+            <div class="row">
+                <label>Título</label>
+                <input type="text" th:field="*{title}" placeholder="Ex.: Criar endpoint de tarefas" required/>
+            </div>
+            <div class="row">
+                <label>Descrição</label>
+                <textarea th:field="*{description}" placeholder="Detalhes..."></textarea>
+            </div>
+            <div class="row">
+                <label>Status</label>
+                <select th:field="*{status}">
+                    <option th:each="st : ${statuses}" th:value="${st}" th:text="${st}"></option>
+                </select>
+            </div>
+            <div class="row">
+                <label>Atribuído a</label>
+                <select th:field="*{assignedUserId}">
+                    <option th:value="">-- Ninguém --</option>
+                    <option th:each="u: ${users}" th:value="${u.id}" th:text="${u.name}"></option>
+                </select>
+            </div>
+            <button type="submit">Adicionar</button>
+        </form>
+    </section>
+
+    <section class="board">
+        <div class="column" th:each="entry : ${board}">
+            <h3 th:text="${entry.key}">STATUS</h3>
+            <div class="card" th:each="task : ${entry.value}">
+                <div class="card-title" th:text="${task.title}">Título</div>
+                <div class="card-desc" th:text="${task.description}">Desc</div>
+                <div class="card-meta">
+                    <span th:if="${task.assignedTo != null}" th:text="'@' + ${task.assignedTo.name}"></span>
+                    <span th:if="${task.assignedTo == null}">Sem responsável</span>
+                </div>
+                <div class="actions">
+                    <form th:action="@{'/tasks/' + ${task.id} + '/move'}" method="post">
+                        <select name="status">
+                            <option th:each="st : ${statuses}" th:value="${st}" th:text="${st}"
+                                    th:selected="${st.name() == task.status.name()}"></option>
+                        </select>
+                        <button type="submit">Mover</button>
+                    </form>
+                    <form th:action="@{'/tasks/' + ${task.id} + '/delete'}" method="post"
+                          onsubmit="return confirm('Excluir esta tarefa?');">
+                        <button class="danger" type="submit">Excluir</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="container">
+    <p>Feito com Spring Boot + Thymeleaf + JPA + Flyway</p>
+</footer>
+</body>
+</html>
